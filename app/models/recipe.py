@@ -1,13 +1,12 @@
 from datetime import date
 
-from fastapi_users_db_sqlalchemy import GUID
-from sqlalchemy import Column, ForeignKey, Date, Text, Boolean
+from sqlalchemy import Column, ForeignKey, Date, Text, Boolean, Integer
 
 from app.core.db import Base
 
 
 class Recipe (Base):
-    user_id = Column(GUID, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
     create = Column(Date, default=date.today, nullable=False)
     update = Column(Date, default=date.today, nullable=False)
     name = Column(Text, nullable=False)

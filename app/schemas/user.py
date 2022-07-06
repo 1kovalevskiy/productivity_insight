@@ -11,11 +11,8 @@ class UserRead(schemas.BaseUser[int]):
 
 class UserCreate(schemas.BaseUserCreate):
     nickname: str
-    create: date
-    update: date
 
 
 class UserUpdate(schemas.BaseUserUpdate):
     nickname: str
-    create: date
     update: date
