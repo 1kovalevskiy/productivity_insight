@@ -1,22 +1,40 @@
-from fastapi import APIRouter
+from fastapi import Depends, APIRouter
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.user import auth_backend, fastapi_users
-from app.schemas.user import UserCreate, UserRead, UserUpdate
+from app.core.db import get_async_session
+from app.core.user import current_user, banned_user
+from app.crud.user import user_crud
+from app.models import User
+from app.schemas.user import UserDB
 
 router = APIRouter()
 
-router.include_router(
-    fastapi_users.get_auth_router(auth_backend),
-    prefix='/auth/jwt',
-    tags=['auth'],
+
+@router.get(
+    '/me',
+    response_model_exclude_none=True,
+    response_model=UserDB
 )
-router.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix='/auth',
-    tags=['auth'],
+async def get_my_profile(
+        user: User = Depends(banned_user),
+        session: AsyncSession = Depends(get_async_session),
+):
+    profile = await user_crud.get_profile_db(
+        obj_id=user.id, session=session
+    )
+    return profile
+
+
+@router.get(
+    '/top',
+    response_model_exclude_none=True,
+    response_model=list[UserDB],
+    dependencies=[Depends(current_user)]
 )
-router.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix='/users',
-    tags=['users'],
-)
+async def get_top_users(
+        session: AsyncSession = Depends(get_async_session),
+):
+    profiles = await user_crud.get_top(
+        session=session
+    )
+    return profiles

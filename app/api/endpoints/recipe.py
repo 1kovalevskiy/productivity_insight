@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
@@ -44,10 +45,19 @@ async def get_recipe(
 @router.get(
     '/',
     response_model_exclude_none=True,
-    response_model=list[RecipeListDB]
+    response_model=Page[RecipeListDB | None]
 )
 async def get_recipe(
+        params: Params = Depends(),
         session: AsyncSession = Depends(get_async_session),
+        name: str = None,
+        type_: str = Query(None, alias='type'),
+        author: int = None
 ):
-    recipes = await recipe_crud.get_list(session=session)
-    return recipes
+    recipes = await recipe_crud.get_list(
+        session=session,
+        name=name,
+        type_=type_,
+        author=author
+    )
+    return paginate(recipes, params)

@@ -2,8 +2,6 @@ from datetime import date
 
 from pydantic import BaseModel, HttpUrl
 
-from app.schemas.user import UserRead
-
 
 class RecipeBase(BaseModel):
     name: str
