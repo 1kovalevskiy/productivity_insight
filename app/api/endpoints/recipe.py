@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter, Depends, Query
 from fastapi_pagination import Page, Params, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +16,8 @@ router = APIRouter()
 @router.post(
     '/',
     response_model_exclude_none=True,
-    response_model=RecipeDB
+    response_model=RecipeDB,
+    status_code=HTTPStatus.CREATED
 )
 async def create_recipe(
         recipe: RecipeCreate,

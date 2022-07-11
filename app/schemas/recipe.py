@@ -1,13 +1,13 @@
 from datetime import date
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, Field
 
 
 class RecipeBase(BaseModel):
     name: str
     type: str
     description: str
-    photo: HttpUrl
+    photo: HttpUrl = Field()
 
 
 class RecipeCreate(RecipeBase):

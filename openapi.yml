@@ -1,0 +1,702 @@
+openapi: 3.0.2
+info:
+  title: Сервис пользовательских рецептов
+  description: Сервис пользовательских рецептов
+  version: 0.1.0
+paths:
+  /auth/jwt/login:
+    post:
+      tags:
+        - auth
+      summary: Auth:Jwt.Login
+      operationId: auth_jwt_login_auth_jwt_login_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_auth_jwt_login_auth_jwt_login_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BearerResponse'
+              example:
+                access_token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiOTIyMWZmYzktNjQwZi00MzcyLTg2ZDMtY2U2NDJjYmE1NjAzIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNTcxNTA0MTkzfQ.M10bjOe45I5Ncu_uXvOmVV8QxnL-nZfcH96U90JaocI
+                token_type: bearer
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+              examples:
+                LOGIN_BAD_CREDENTIALS:
+                  summary: Bad credentials or the user is inactive.
+                  value:
+                    detail: LOGIN_BAD_CREDENTIALS
+                LOGIN_USER_NOT_VERIFIED:
+                  summary: The user is not verified.
+                  value:
+                    detail: LOGIN_USER_NOT_VERIFIED
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/jwt/logout:
+    post:
+      tags:
+        - auth
+      summary: Auth:Jwt.Logout
+      operationId: auth_jwt_logout_auth_jwt_logout_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Missing token or inactive user.
+      security:
+        - OAuth2PasswordBearer: []
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register:Register
+      operationId: register_register_auth_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRead'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+              examples:
+                REGISTER_USER_ALREADY_EXISTS:
+                  summary: A user with this email already exists.
+                  value:
+                    detail: REGISTER_USER_ALREADY_EXISTS
+                REGISTER_INVALID_PASSWORD:
+                  summary: Password validation failed.
+                  value:
+                    detail:
+                      code: REGISTER_INVALID_PASSWORD
+                      reason: Password should beat least 3 characters
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /user/{id}/lock:
+    patch:
+      tags:
+        - Admin
+      summary: Lock Profile
+      operationId: lock_profile_user__id__lock_patch
+      parameters:
+        - required: true
+          schema:
+            title: Id
+            type: integer
+          name: id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /user/{id}/unlock:
+    patch:
+      tags:
+        - Admin
+      summary: Unlock Profile
+      operationId: unlock_profile_user__id__unlock_patch
+      parameters:
+        - required: true
+          schema:
+            title: Id
+            type: integer
+          name: id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /user/:
+    get:
+      tags:
+        - Admin
+      summary: Get Profiles
+      operationId: get_profiles_user__get
+      parameters:
+        - required: false
+          schema:
+            title: Page
+            minimum: 1
+            type: integer
+            default: 1
+          name: page
+          in: query
+        - required: false
+          schema:
+            title: Size
+            maximum: 100
+            minimum: 1
+            type: integer
+            default: 50
+          name: size
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Union_UserRead__NoneType__'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /recipe/:
+    get:
+      tags:
+        - Recipes
+      summary: Get Recipe
+      operationId: get_recipe_recipe__get
+      parameters:
+        - required: false
+          schema:
+            title: Name
+            type: string
+          name: name
+          in: query
+        - required: false
+          schema:
+            title: Type
+            type: string
+          name: type
+          in: query
+        - required: false
+          schema:
+            title: Author
+            type: integer
+          name: author
+          in: query
+        - required: false
+          schema:
+            title: Page
+            minimum: 1
+            type: integer
+            default: 1
+          name: page
+          in: query
+        - required: false
+          schema:
+            title: Size
+            maximum: 100
+            minimum: 1
+            type: integer
+            default: 50
+          name: size
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_Union_RecipeListDB__NoneType__'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+        - Recipes
+      summary: Create Recipe
+      operationId: create_recipe_recipe__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeDB'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /recipe/{id}:
+    get:
+      tags:
+        - Recipes
+      summary: Get Recipe
+      operationId: get_recipe_recipe__id__get
+      parameters:
+        - required: true
+          schema:
+            title: Id
+            type: integer
+          name: id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeDB'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /user/me:
+    get:
+      tags:
+        - Users
+      summary: Get My Profile
+      operationId: get_my_profile_user_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDB'
+      security:
+        - OAuth2PasswordBearer: []
+  /user/top:
+    get:
+      tags:
+        - Users
+      summary: Get Top Users
+      operationId: get_top_users_user_top_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Top Users User Top Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDB'
+      security:
+        - OAuth2PasswordBearer: []
+components:
+  schemas:
+    BearerResponse:
+      title: BearerResponse
+      required:
+        - access_token
+        - token_type
+      type: object
+      properties:
+        access_token:
+          title: Access Token
+          type: string
+        token_type:
+          title: Token Type
+          type: string
+    Body_auth_jwt_login_auth_jwt_login_post:
+      title: Body_auth_jwt_login_auth_jwt_login_post
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        grant_type:
+          title: Grant Type
+          pattern: password
+          type: string
+        username:
+          title: Username
+          type: string
+        password:
+          title: Password
+          type: string
+        scope:
+          title: Scope
+          type: string
+          default: ''
+        client_id:
+          title: Client Id
+          type: string
+        client_secret:
+          title: Client Secret
+          type: string
+    ErrorModel:
+      title: ErrorModel
+      required:
+        - detail
+      type: object
+      properties:
+        detail:
+          title: Detail
+          anyOf:
+            - type: string
+            - type: object
+              additionalProperties:
+                type: string
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        detail:
+          title: Detail
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    Page_Union_RecipeListDB__NoneType__:
+      title: Page[Union[RecipeListDB, NoneType]]
+      required:
+        - items
+        - total
+        - page
+        - size
+      type: object
+      properties:
+        items:
+          title: Items
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeListDB'
+        total:
+          title: Total
+          minimum: 0
+          type: integer
+        page:
+          title: Page
+          minimum: 1
+          type: integer
+        size:
+          title: Size
+          minimum: 1
+          type: integer
+    Page_Union_UserRead__NoneType__:
+      title: Page[Union[UserRead, NoneType]]
+      required:
+        - items
+        - total
+        - page
+        - size
+      type: object
+      properties:
+        items:
+          title: Items
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRead'
+        total:
+          title: Total
+          minimum: 0
+          type: integer
+        page:
+          title: Page
+          minimum: 1
+          type: integer
+        size:
+          title: Size
+          minimum: 1
+          type: integer
+    RecipeCreate:
+      title: RecipeCreate
+      required:
+        - name
+        - type
+        - description
+        - photo
+        - steps
+      type: object
+      properties:
+        name:
+          title: Name
+          type: string
+        type:
+          title: Type
+          type: string
+        description:
+          title: Description
+          type: string
+        photo:
+          title: Photo
+          maxLength: 2083
+          minLength: 1
+          type: string
+          format: uri
+        steps:
+          title: Steps
+          type: string
+    RecipeDB:
+      title: RecipeDB
+      required:
+        - name
+        - type
+        - description
+        - photo
+        - id
+        - user_id
+        - create
+        - update
+        - status
+        - steps
+      type: object
+      properties:
+        name:
+          title: Name
+          type: string
+        type:
+          title: Type
+          type: string
+        description:
+          title: Description
+          type: string
+        photo:
+          title: Photo
+          maxLength: 2083
+          minLength: 1
+          type: string
+          format: uri
+        id:
+          title: Id
+          type: integer
+        user_id:
+          title: User Id
+          type: integer
+        create:
+          title: Create
+          type: string
+          format: date
+        update:
+          title: Update
+          type: string
+          format: date
+        status:
+          title: Status
+          type: boolean
+        steps:
+          title: Steps
+          type: string
+    RecipeListDB:
+      title: RecipeListDB
+      required:
+        - name
+        - type
+        - description
+        - photo
+        - id
+        - user_id
+        - create
+        - update
+        - status
+      type: object
+      properties:
+        name:
+          title: Name
+          type: string
+        type:
+          title: Type
+          type: string
+        description:
+          title: Description
+          type: string
+        photo:
+          title: Photo
+          maxLength: 2083
+          minLength: 1
+          type: string
+          format: uri
+        id:
+          title: Id
+          type: integer
+        user_id:
+          title: User Id
+          type: integer
+        create:
+          title: Create
+          type: string
+          format: date
+        update:
+          title: Update
+          type: string
+          format: date
+        status:
+          title: Status
+          type: boolean
+    UserCreate:
+      title: UserCreate
+      required:
+        - email
+        - password
+        - nickname
+      type: object
+      properties:
+        email:
+          title: Email
+          type: string
+          format: email
+        password:
+          title: Password
+          type: string
+        is_active:
+          title: Is Active
+          type: boolean
+          default: true
+        is_superuser:
+          title: Is Superuser
+          type: boolean
+          default: false
+        is_verified:
+          title: Is Verified
+          type: boolean
+          default: false
+        nickname:
+          title: Nickname
+          type: string
+    UserDB:
+      title: UserDB
+      required:
+        - id
+        - email
+        - nickname
+        - is_active
+        - count
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+        email:
+          title: Email
+          type: string
+        nickname:
+          title: Nickname
+          type: string
+        is_active:
+          title: Is Active
+          type: boolean
+        count:
+          title: Count
+          type: integer
+    UserRead:
+      title: UserRead
+      required:
+        - email
+        - nickname
+        - create
+        - update
+      type: object
+      properties:
+        id:
+          title: Id
+        email:
+          title: Email
+          type: string
+          format: email
+        is_active:
+          title: Is Active
+          type: boolean
+          default: true
+        is_superuser:
+          title: Is Superuser
+          type: boolean
+          default: false
+        is_verified:
+          title: Is Verified
+          type: boolean
+          default: false
+        nickname:
+          title: Nickname
+          type: string
+        create:
+          title: Create
+          type: string
+          format: date
+        update:
+          title: Update
+          type: string
+          format: date
+      description: Base User model.
+    ValidationError:
+      title: ValidationError
+      required:
+        - loc
+        - msg
+        - type
+      type: object
+      properties:
+        loc:
+          title: Location
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: auth/jwt/login
